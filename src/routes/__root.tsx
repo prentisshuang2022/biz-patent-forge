@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
+  ClientOnly,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
@@ -115,7 +116,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster position="top-center" richColors />
+      <ClientOnly fallback={null}>
+        <Toaster position="top-center" richColors />
+      </ClientOnly>
     </QueryClientProvider>
   );
 }
