@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>专利后台管理 · 原型</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: { DEFAULT: '#5b6cf5', light: '#eef0ff' },
+          success: { DEFAULT: '#16a34a', light: '#dcfce7' },
+          warning: { DEFAULT: '#d97706', light: '#fef3c7' },
+          info:    { DEFAULT: '#0284c7', light: '#e0f2fe' },
+          danger:  { DEFAULT: '#dc2626' },
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background:#f7f8fb; color:#1f2937; }
+  .page { display:none; }
+  .page.active { display:block; }
+  .nav-item.active { background:#eef0ff; color:#5b6cf5; font-weight:500; }
+  .stat-accent::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:#5b6cf5; }
+  table { border-collapse: collapse; width:100%; font-size:14px; }
+  thead { background:#f3f4f6; }
+  thead th { text-align:left; font-weight:500; font-size:12px; color:#6b7280; padding:12px 16px; }
+  tbody td { padding:14px 16px; border-top:1px solid #e5e7eb; }
+  tbody tr:hover { background:#f9fafb; }
+  .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:500; }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:6px; font-size:13px; cursor:pointer; border:1px solid transparent; }
+  .btn-primary { background:#5b6cf5; color:#fff; }
+  .btn-primary:hover { background:#4a5be8; }
+  .btn-outline { background:#fff; border-color:#d1d5db; color:#374151; }
+  .btn-outline:hover { background:#f9fafb; }
+  .input { width:100%; height:36px; padding:0 12px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; background:#fff; outline:none; }
+  .input:focus { border-color:#5b6cf5; box-shadow:0 0 0 3px rgba(91,108,245,.15); }
+  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; display:none; align-items:center; justify-content:center; }
+  .modal-mask.show { display:flex; }
+  .modal { background:#fff; border-radius:8px; width:440px; max-width:92vw; box-shadow:0 20px 50px rgba(0,0,0,.18); }
+  .drawer-mask { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; display:none; }
+  .drawer-mask.show { display:block; }
+  .drawer { position:fixed; right:0; top:0; bottom:0; width:480px; max-width:92vw; background:#fff; box-shadow:-8px 0 24px rgba(0,0,0,.12); padding:24px; overflow-y:auto; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="fixed top-0 inset-x-0 z-40 h-14 bg-white border-b border-gray-200 flex items-center px-6">
+  <div class="flex items-center gap-2 font-semibold">
+    <div class="w-7 h-7 rounded-md bg-gradient-to-br from-primary to-indigo-400 text-white flex items-center justify-center text-sm font-bold">P</div>
+    <span>AI 专利创新空间</span>
+    <span class="ml-3 px-2 py-0.5 text-xs rounded bg-primary-light text-primary">后台管理</span>
+  </div>
+  <div class="ml-auto flex items-center gap-4">
+    <button class="flex items-center gap-1 text-xs text-gray-500 hover:text-primary">← 返回前台</button>
+    <div class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-100 cursor-pointer">
+      <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold">管</div>
+      <span class="text-xs text-gray-500">管理员 admin</span>
+      <span class="text-[11px] px-1.5 py-px rounded bg-amber-100 text-amber-700">超管</span>
+    </div>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<aside class="fixed top-14 bottom-0 left-0 w-[220px] bg-white border-r border-gray-200 p-3 overflow-y-auto">
+  <div class="text-[11px] text-gray-400 font-medium px-3 pt-3 pb-2 tracking-wider">用户与权限</div>
+  <a class="nav-item active flex items-center gap-2 px-3 py-2 rounded-md text-[13.5px] mb-0.5 cursor-pointer text-gray-700 hover:bg-gray-100" data-page="users">👥 <span>用户管理</span></a>
+  <a class="nav-item flex items-center gap-2 px-3 py-2 rounded-md text-[13.5px] mb-0.5 cursor-pointer text-gray-700 hover:bg-gray-100" data-page="roles">🛡️ <span>角色管理</span></a>
+  <div class="text-[11px] text-gray-400 font-medium px-3 pt-3 pb-2 tracking-wider">订阅与推送</div>
+  <a class="nav-item flex items-center gap-2 px-3 py-2 rounded-md text-[13.5px] mb-0.5 cursor-pointer text-gray-700 hover:bg-gray-100" data-page="subscriptions">🔔 <span>订阅管理</span></a>
+  <a class="nav-item flex items-center gap-2 px-3 py-2 rounded-md text-[13.5px] mb-0.5 cursor-pointer text-gray-700 hover:bg-gray-100" data-page="push">📥 <span>推送记录</span><span class="ml-auto bg-red-500 text-white text-[10px] px-1.5 rounded-full">12</span></a>
+</aside>
+
+<main class="ml-[220px] pt-14 p-8 min-w-0">
+
+<!-- ============ 用户管理 ============ -->
+<section class="page active" id="page-users">
+  <div class="flex justify-between items-end mb-5">
+    <div>
+      <h1 class="text-xl font-semibold">用户管理</h1>
+      <p class="text-sm text-gray-500 mt-1">管理系统内所有用户及其角色</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('createUser')">+ 新建用户</button>
+  </div>
+
+  <div class="grid grid-cols-3 gap-4 mb-5">
+    <div class="relative overflow-hidden bg-white rounded-lg p-5 border border-gray-200 stat-accent">
+      <div class="text-xs text-gray-500 mb-2">注册用户</div>
+      <div class="text-[26px] font-semibold leading-tight">7<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 人</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">↑ 本月新增 12</div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">活跃用户（30天）</div>
+      <div class="text-[26px] font-semibold leading-tight">42<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 人</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">活跃率 48.8%</div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">超级管理员</div>
+      <div class="text-[26px] font-semibold leading-tight">1<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 人</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">含 1 个系统超管</div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg p-4 border border-gray-200 mb-4 flex gap-3 items-center flex-wrap">
+    <input class="input" style="width:240px" placeholder="🔍 搜索用户名 / 账号" />
+    <select class="input" style="width:160px">
+      <option>全部角色</option><option>超级管理员</option><option>专利服务</option><option>企业分析</option>
+    </select>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table>
+      <thead><tr>
+        <th>用户</th><th>账号</th><th>角色</th><th>已授权模板</th><th>最近登录</th><th style="width:180px">操作</th>
+      </tr></thead>
+      <tbody id="users-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 角色管理 ============ -->
+<section class="page" id="page-roles">
+  <div class="mb-5">
+    <h1 class="text-xl font-semibold">角色管理</h1>
+    <p class="text-sm text-gray-500 mt-1">按角色配置可使用的任务模板 · 角色为系统内置，不可新增或删除</p>
+  </div>
+  <div class="grid gap-4" style="grid-template-columns:320px 1fr; min-height:540px;">
+    <div class="bg-white rounded-lg border border-gray-200 flex flex-col overflow-hidden">
+      <div class="px-4 py-3.5 border-b border-gray-200 font-medium text-sm">角色列表 <span class="text-gray-400 text-xs font-normal ml-2">共 2 项</span></div>
+      <div class="flex-1 p-2" id="role-list"></div>
+    </div>
+    <div class="bg-white rounded-lg border border-gray-200 flex flex-col overflow-hidden">
+      <div class="px-4 py-3.5 border-b border-gray-200 flex justify-between items-center">
+        <div class="font-medium text-sm">可分配模板 <span class="text-gray-400 text-xs font-normal ml-2">当前角色：<span id="role-current-name">专利服务</span></span></div>
+        <div class="text-xs text-gray-500">已勾选 <span id="role-checked-count">4</span> 个</div>
+      </div>
+      <div class="flex-1 p-3 overflow-y-auto space-y-2" id="template-list"></div>
+      <div class="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
+        <button class="btn btn-outline" onclick="resetRole()">重置</button>
+        <button class="btn btn-primary" onclick="alert('已保存')">保存授权</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 订阅管理 ============ -->
+<section class="page" id="page-subscriptions">
+  <div class="flex justify-between items-end mb-5">
+    <div>
+      <h1 class="text-xl font-semibold">订阅管理</h1>
+      <p class="text-sm text-gray-500 mt-1">以用户为维度配置可开启的订阅数量上限 · 启停与推送统计请前往「推送记录」</p>
+    </div>
+    <button class="btn btn-outline" onclick="openModal('batchLimit')">⚙ 批量设置默认上限</button>
+  </div>
+
+  <div class="grid grid-cols-4 gap-4 mb-5">
+    <div class="relative overflow-hidden bg-white rounded-lg p-5 border border-gray-200 stat-accent">
+      <div class="text-xs text-gray-500 mb-2">总用户数</div>
+      <div class="text-[26px] font-semibold">7<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 人</span></div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">已设置配额</div>
+      <div class="text-[26px] font-semibold">7<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 人</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">占比 100%</div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">平均配额</div>
+      <div class="text-[26px] font-semibold">7<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 条/人</span></div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">接近上限（≥80%）</div>
+      <div class="text-[26px] font-semibold text-warning">3<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 人</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">建议提升配额或提醒</div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg p-4 border border-gray-200 mb-4 flex gap-3 items-center flex-wrap">
+    <input class="input" style="width:240px" placeholder="🔍 搜索用户 / 账号" />
+    <select class="input" style="width:160px"><option>全部角色</option><option>超级管理员</option><option>专利服务</option><option>企业分析</option></select>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table>
+      <thead><tr>
+        <th>用户</th><th>账号</th><th>角色</th><th>已开启订阅</th><th>订阅上限</th><th style="width:200px">使用率</th><th style="width:120px">操作</th>
+      </tr></thead>
+      <tbody id="subs-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 推送记录 ============ -->
+<section class="page" id="page-push">
+  <div class="mb-5">
+    <h1 class="text-xl font-semibold">推送记录</h1>
+    <p class="text-sm text-gray-500 mt-1">观测订阅推送是否正常执行 · 是否存在堆积、无推送、未读过多</p>
+  </div>
+
+  <div class="grid grid-cols-4 gap-4 mb-5">
+    <div class="relative overflow-hidden bg-white rounded-lg p-5 border border-gray-200 stat-accent">
+      <div class="text-xs text-gray-500 mb-2">运行中订阅</div>
+      <div class="text-[26px] font-semibold">147<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 条</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">今日触发 62 次</div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">今日推送次数</div>
+      <div class="text-[26px] font-semibold">62<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 次</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">↑ 较昨日 +5</div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">推送总量</div>
+      <div class="text-[26px] font-semibold">234<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 件</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">平均 3.8 件/次</div>
+    </div>
+    <div class="bg-white rounded-lg p-5 border border-gray-200">
+      <div class="text-xs text-gray-500 mb-2">未读推送</div>
+      <div class="text-[26px] font-semibold text-warning">12<span class="text-[13px] text-gray-500 font-normal ml-0.5"> 条</span></div>
+      <div class="text-xs text-gray-500 mt-1.5">来自 5 位用户</div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg p-4 border border-gray-200 mb-4 flex gap-3 items-center flex-wrap">
+    <input class="input" style="width:240px" placeholder="🔍 搜索订阅名称 / 用户" />
+    <select class="input" style="width:140px"><option>全部时间</option><option>今天</option><option>近 7 天</option></select>
+    <select class="input" style="width:140px"><option>全部状态</option><option>有推送</option><option>0 件</option></select>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table>
+      <thead><tr><th>订阅</th><th>所属用户</th><th>类型</th><th>推送时间</th><th>推送数量</th><th style="width:120px">操作</th></tr></thead>
+      <tbody id="push-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Modals ===== -->
+<div class="modal-mask" id="modal-createUser">
+  <div class="modal">
+    <div class="px-5 py-4 border-b border-gray-200"><div class="font-semibold">新建用户</div><div class="text-xs text-gray-500 mt-1">填写基础信息并指定角色</div></div>
+    <div class="p-5 space-y-3">
+      <div><label class="text-sm">姓名</label><input class="input mt-1.5"/></div>
+      <div><label class="text-sm">账号</label><input class="input mt-1.5"/></div>
+      <div><label class="text-sm">密码</label><input class="input mt-1.5" type="password"/></div>
+      <div><label class="text-sm">角色</label>
+        <select class="input mt-1.5"><option>专利服务</option><option>企业分析</option><option>超级管理员</option></select>
+      </div>
+    </div>
+    <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal()">创建</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="modal-editUser">
+  <div class="modal">
+    <div class="px-5 py-4 border-b border-gray-200"><div class="font-semibold">修改用户</div><div class="text-xs text-gray-500 mt-1" id="edit-user-sub"></div></div>
+    <div class="p-5 space-y-3">
+      <div><label class="text-sm">账号</label><input class="input mt-1.5" id="edit-user-account"/></div>
+      <div><label class="text-sm">新密码</label><input class="input mt-1.5" type="password" placeholder="留空表示不修改"/></div>
+      <div><label class="text-sm">确认新密码</label><input class="input mt-1.5" type="password" placeholder="再次输入新密码"/></div>
+    </div>
+    <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="modal-deleteUser">
+  <div class="modal">
+    <div class="px-5 py-4"><div class="font-semibold">确认删除用户？</div><div class="text-sm text-gray-500 mt-2" id="del-user-text"></div></div>
+    <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn" style="background:#dc2626;color:#fff" onclick="closeModal()">删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="modal-editLimit">
+  <div class="modal">
+    <div class="px-5 py-4 border-b border-gray-200"><div class="font-semibold">修改订阅上限</div><div class="text-xs text-gray-500 mt-1" id="limit-user-sub"></div></div>
+    <div class="p-5"><label class="text-sm">订阅数量上限</label><input class="input mt-1.5" type="number" value="5"/><p class="text-xs text-gray-500 mt-2">设为 0 表示禁止该用户开启新订阅。</p></div>
+    <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="closeModal()">保存</button></div>
+  </div>
+</div>
+
+<div class="modal-mask" id="modal-batchLimit">
+  <div class="modal">
+    <div class="px-5 py-4 border-b border-gray-200"><div class="font-semibold">批量设置默认上限</div><div class="text-xs text-gray-500 mt-1">将为所有用户应用同一订阅数量上限</div></div>
+    <div class="p-5"><label class="text-sm">默认订阅上限</label><input class="input mt-1.5" type="number" value="5"/></div>
+    <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="closeModal()">应用</button></div>
+  </div>
+</div>
+
+<!-- ===== Drawer (push detail) ===== -->
+<div class="drawer-mask" id="drawer-push" onclick="if(event.target===this)closeDrawer()">
+  <div class="drawer">
+    <div class="text-lg font-semibold" id="push-title"></div>
+    <div class="text-sm text-gray-500 mt-1" id="push-sub"></div>
+    <div class="mt-6 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-3 rounded-md border border-gray-200 bg-gray-50">
+          <div class="text-xs text-gray-500 mb-1">推送数量</div>
+          <div class="text-xl font-semibold" id="push-count"></div>
+        </div>
+        <div class="p-3 rounded-md border border-gray-200 bg-gray-50">
+          <div class="text-xs text-gray-500 mb-1">推送状态</div>
+          <div class="text-sm font-medium" id="push-status"></div>
+        </div>
+      </div>
+      <div class="rounded-md border border-gray-200 divide-y divide-gray-200" id="push-meta"></div>
+      <div class="text-xs text-gray-500 leading-relaxed">本抽屉仅展示推送摘要信息,完整的专利清单及阅读状态请前往用户端订阅消息中心查看。</div>
+    </div>
+    <div class="mt-6"><button class="btn btn-outline" onclick="closeDrawer()">关闭</button></div>
+  </div>
+</div>
+
+<script>
+// ===== Data =====
+const USERS = [
+  {id:'u1',name:'王晓明',account:'wangxm',role:'super',avatar:'from-indigo-400 to-indigo-600',reg:'2025-08-12',last:'2026-05-19 09:23',used:0,limit:20},
+  {id:'u2',name:'李芳',account:'lifang',role:'patent',avatar:'from-orange-400 to-orange-500',reg:'2025-09-03',last:'2026-05-19 14:01',used:4,limit:5},
+  {id:'u3',name:'陈志强',account:'chenzq',role:'patent',avatar:'from-emerald-400 to-emerald-500',reg:'2025-10-21',last:'2026-05-18 16:55',used:2,limit:5},
+  {id:'u4',name:'赵小琴',account:'zhaoxq',role:'analysis',avatar:'from-pink-400 to-pink-500',reg:'2025-11-08',last:'2026-04-22 10:11',used:0,limit:3},
+  {id:'u5',name:'刘宏伟',account:'liuhw',role:'analysis',avatar:'from-violet-400 to-violet-500',reg:'2026-01-15',last:'2026-05-19 11:42',used:3,limit:5},
+  {id:'u6',name:'孙志国',account:'sunzg',role:'patent',avatar:'from-sky-400 to-sky-500',reg:'2026-02-02',last:'2026-05-10 09:00',used:1,limit:5},
+  {id:'u7',name:'吴鹏',account:'wupeng',role:'analysis',avatar:'from-rose-400 to-rose-500',reg:'2026-03-11',last:'2026-05-19 08:15',used:5,limit:5},
+];
+const ROLE_LABEL = { super:'超级管理员', patent:'专利服务', analysis:'企业分析' };
+const ROLE_BADGE = { super:'bg-info-light text-info', patent:'bg-success-light text-success', analysis:'bg-warning-light text-warning' };
+
+const TEMPLATES = [
+  {key:'novelty',name:'专利查新',icon:'🔍',cat:'查新'},
+  {key:'disclosure',name:'技术交底书撰写',icon:'📝',cat:'撰写'},
+  {key:'drafting',name:'专利申请文件撰写',icon:'📄',cat:'撰写'},
+  {key:'oa',name:'OA 审查意见答复',icon:'✉️',cat:'答复'},
+  {key:'landscape',name:'技术全景扫描',icon:'🌐',cat:'分析'},
+  {key:'highvalue',name:'高价值专利筛选',icon:'⭐',cat:'分析'},
+];
+const ROLE_TEMPLATES = { patent:['novelty','disclosure','drafting','oa'], analysis:['landscape','highvalue'] };
+const ROLES = [
+  {id:'patent',name:'专利服务',desc:'面向专利从业者，可使用 4 个撰写/查新/答复模板'},
+  {id:'analysis',name:'企业分析',desc:'面向企业战略分析，可使用 2 个分析类模板'},
+];
+let mapping = { patent:[...ROLE_TEMPLATES.patent], analysis:[...ROLE_TEMPLATES.analysis] };
+let currentRole = 'patent';
+
+const PUSH_RECORDS = [
+  {id:'1',subscription:'固态电池领域新增专利',subCode:'SUB-2026-0142',user:'李芳',type:'技术领域',count:12,time:'2026-05-19 08:00',status:'success'},
+  {id:'2',subscription:'华为终端公司新增专利',subCode:'SUB-2026-0139',user:'陈志强',type:'申请人',count:5,time:'2026-05-19 08:00',status:'success'},
+  {id:'3',subscription:'人形机器人触觉传感专题',subCode:'SUB-2026-0136',user:'刘宏伟',type:'检索式',count:0,time:'2026-05-19 08:00',status:'warning'},
+  {id:'4',subscription:'CN114567890A 同族监控',subCode:'SUB-2026-0130',user:'李芳',type:'单件专利',count:2,time:'2026-05-18 08:00',status:'success'},
+  {id:'5',subscription:'张三发明人监控',subCode:'SUB-2026-0119',user:'吴鹏',type:'发明人',count:0,time:'2026-05-19 08:00',status:'warning'},
+];
+
+// ===== Nav =====
+document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  n.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + n.dataset.page).classList.add('active');
+}));
+
+// ===== Render users =====
+function renderUsers() {
+  document.getElementById('users-tbody').innerHTML = USERS.map(u => `
+    <tr>
+      <td><div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${u.avatar} text-white flex items-center justify-center text-xs font-semibold">${u.name.charAt(0)}</div>
+        <div><div class="font-medium">${u.name}</div><div class="text-xs text-gray-500 mt-0.5">注册于 ${u.reg}</div></div>
+      </div></td>
+      <td class="text-gray-700">${u.account}</td>
+      <td><span class="badge ${ROLE_BADGE[u.role]}">${ROLE_LABEL[u.role]}</span></td>
+      <td class="text-gray-700">${u.role==='super'?'—（全部）':(ROLE_TEMPLATES[u.role].length+' 个')}</td>
+      <td class="text-gray-700">${u.last}</td>
+      <td><div class="flex gap-3">
+        <button class="text-primary text-sm hover:underline" onclick="editUser('${u.id}')">修改</button>
+        <button class="text-red-600 text-sm hover:underline" onclick="deleteUser('${u.id}')">删除</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+function editUser(id){const u=USERS.find(x=>x.id===id);document.getElementById('edit-user-sub').textContent=u.name+' · '+ROLE_LABEL[u.role];document.getElementById('edit-user-account').value=u.account;openModal('editUser');}
+function deleteUser(id){const u=USERS.find(x=>x.id===id);document.getElementById('del-user-text').innerHTML='将永久删除用户 <span class="font-medium text-gray-900">'+u.name+'</span>（账号 '+u.account+'），此操作不可恢复。';openModal('deleteUser');}
+
+// ===== Render roles =====
+function renderRoles() {
+  document.getElementById('role-list').innerHTML = ROLES.map(r => {
+    const active = r.id === currentRole;
+    return `<button onclick="selectRole('${r.id}')" class="w-full text-left px-3 py-3 rounded-md mb-1 ${active?'bg-primary-light':'hover:bg-gray-100'}">
+      <div class="font-medium text-sm ${active?'text-primary':''}">${r.name}</div>
+      <div class="text-xs text-gray-500 mt-1 leading-relaxed">${r.desc}</div>
+      <div class="text-[11px] text-gray-500 mt-1.5">已勾选 ${mapping[r.id].length} / ${r.id==='patent'?4:2} 个模板</div>
+    </button>`;
+  }).join('');
+  const cur = mapping[currentRole];
+  document.getElementById('role-current-name').textContent = ROLES.find(r=>r.id===currentRole).name;
+  document.getElementById('role-checked-count').textContent = cur.length;
+  document.getElementById('template-list').innerHTML = TEMPLATES.map(t => {
+    const checked = cur.includes(t.key);
+    return `<label class="flex items-center gap-3 p-3 rounded-md border cursor-pointer ${checked?'border-primary/40 bg-primary-light/50':'border-gray-200 hover:bg-gray-50'}">
+      <input type="checkbox" ${checked?'checked':''} onchange="toggleTpl('${t.key}')" class="w-4 h-4 accent-indigo-500"/>
+      <div class="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center text-xl flex-shrink-0">${t.icon}</div>
+      <div class="flex-1"><div class="font-medium text-sm">${t.name}</div><div class="text-xs text-gray-500 mt-0.5">${t.cat}</div></div>
+    </label>`;
+  }).join('');
+}
+function selectRole(id){currentRole=id;renderRoles();}
+function toggleTpl(k){const cur=mapping[currentRole];mapping[currentRole]=cur.includes(k)?cur.filter(x=>x!==k):[...cur,k];renderRoles();}
+function resetRole(){mapping={patent:[...ROLE_TEMPLATES.patent],analysis:[...ROLE_TEMPLATES.analysis]};renderRoles();}
+
+// ===== Render subs =====
+function renderSubs() {
+  document.getElementById('subs-tbody').innerHTML = USERS.map(u => {
+    const ratio = u.limit>0 ? u.used/u.limit : 0;
+    const pct = Math.min(100, Math.round(ratio*100));
+    const color = ratio>=1?'bg-red-500':ratio>=0.8?'bg-amber-500':'bg-primary';
+    return `<tr>
+      <td><div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${u.avatar} text-white flex items-center justify-center text-xs font-semibold">${u.name.charAt(0)}</div>
+        <div class="font-medium">${u.name}</div>
+      </div></td>
+      <td class="text-gray-700">${u.account}</td>
+      <td><span class="badge ${ROLE_BADGE[u.role]}">${ROLE_LABEL[u.role]}</span></td>
+      <td class="text-gray-700">${u.used} 条</td>
+      <td class="text-gray-700">${u.limit} 条</td>
+      <td><div class="flex items-center gap-2">
+        <div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden"><div class="h-full ${color} rounded-full" style="width:${pct}%"></div></div>
+        <span class="text-xs text-gray-500 w-10 text-right">${pct}%</span>
+      </div></td>
+      <td><button class="text-primary text-sm hover:underline" onclick="editLimit('${u.id}')">修改上限</button></td>
+    </tr>`;
+  }).join('');
+}
+function editLimit(id){const u=USERS.find(x=>x.id===id);document.getElementById('limit-user-sub').textContent='用户：'+u.name+'（当前已开启 '+u.used+' 条）';openModal('editLimit');}
+
+// ===== Render push =====
+function renderPush() {
+  document.getElementById('push-tbody').innerHTML = PUSH_RECORDS.map(r => `
+    <tr>
+      <td><div class="font-medium">${r.subscription}</div><div class="text-xs text-gray-500 mt-0.5">${r.subCode}</div></td>
+      <td class="text-gray-700">${r.user}</td>
+      <td><span class="badge bg-primary-light text-primary">${r.type}</span></td>
+      <td class="text-gray-700">${r.time}</td>
+      <td class="${r.status==='warning'?'text-warning':'text-gray-700'}">${r.count} 件</td>
+      <td><button class="text-primary text-sm hover:underline" onclick="showPush('${r.id}')">查看详情</button></td>
+    </tr>
+  `).join('');
+}
+function showPush(id) {
+  const r = PUSH_RECORDS.find(x=>x.id===id);
+  document.getElementById('push-title').textContent = r.subscription;
+  document.getElementById('push-sub').textContent = r.subCode+' · '+r.user+' · '+r.time;
+  document.getElementById('push-count').innerHTML = `<span class="${r.status==='warning'?'text-warning':''}">${r.count}</span> <span class="text-xs text-gray-500 font-normal">件</span>`;
+  document.getElementById('push-status').innerHTML = r.status==='warning'?'<span class="text-warning">无新增</span>':'<span class="text-success">推送成功</span>';
+  document.getElementById('push-meta').innerHTML = [
+    ['订阅名称',r.subscription],['订阅编号',r.subCode],['所属用户',r.user],
+    ['订阅类型',r.type],['推送时间',r.time],['推送渠道','站内消息 · 邮件'],['触发方式','每日定时(08:00)']
+  ].map(([k,v])=>`<div class="flex justify-between px-3 py-2.5 text-sm"><span class="text-gray-500">${k}</span><span class="text-gray-800">${v}</span></div>`).join('');
+  document.getElementById('drawer-push').classList.add('show');
+}
+function closeDrawer(){document.getElementById('drawer-push').classList.remove('show');}
+
+function openModal(id){document.getElementById('modal-'+id).classList.add('show');}
+function closeModal(){document.querySelectorAll('.modal-mask').forEach(m=>m.classList.remove('show'));}
+
+renderUsers(); renderRoles(); renderSubs(); renderPush();
+</script>
+
+</body>
+</html>
