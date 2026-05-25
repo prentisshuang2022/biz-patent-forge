@@ -13,6 +13,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -34,15 +35,22 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRolesRoute = AdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/roles': typeof AdminRolesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -50,15 +58,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/roles': typeof AdminRolesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin/users' | '/admin/'
+  fullPaths: '/' | '/admin' | '/admin/roles' | '/admin/users' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/users' | '/admin'
-  id: '__root__' | '/' | '/admin' | '/admin/users' | '/admin/'
+  to: '/' | '/admin/roles' | '/admin/users' | '/admin'
+  id: '__root__' | '/' | '/admin' | '/admin/roles' | '/admin/users' | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -96,15 +105,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/roles': {
+      id: '/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminRolesRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminRolesRoute: typeof AdminRolesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminRolesRoute: AdminRolesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
