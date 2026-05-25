@@ -229,26 +229,49 @@ function PushPage() {
               {active?.subCode} · {active?.user} · {active?.time}
             </SheetDescription>
           </SheetHeader>
-          <div className="mt-6">
-            <div className="text-sm text-muted-foreground mb-3">
-              本次推送 {active?.count ?? 0} 件专利
-            </div>
-            {active && active.patents.length > 0 ? (
-              <div className="space-y-2">
-                {active.patents.map((p) => (
-                  <div key={p.no} className="p-3 border border-border/60 rounded-md">
-                    <div className="text-xs text-primary font-medium mb-1">{p.no}</div>
-                    <div className="text-sm text-foreground leading-snug mb-1.5">{p.title}</div>
-                    <div className="text-xs text-muted-foreground">{p.meta}</div>
+          {active && (
+            <div className="mt-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-md border border-border/60 bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">推送数量</div>
+                  <div className={`text-xl font-semibold ${active.status === "warning" ? "text-warning" : "text-foreground"}`}>
+                    {active.count} <span className="text-xs text-muted-foreground font-normal">件</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-md border border-border/60 bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">推送状态</div>
+                  <div className="text-sm font-medium">
+                    {active.status === "warning" ? (
+                      <span className="text-warning">无新增</span>
+                    ) : (
+                      <span className="text-success">推送成功</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-md border border-border/60 divide-y divide-border/60">
+                {[
+                  ["订阅名称", active.subscription],
+                  ["订阅编号", active.subCode],
+                  ["所属用户", active.user],
+                  ["订阅类型", active.type],
+                  ["推送时间", active.time],
+                  ["推送渠道", "站内消息 · 邮件"],
+                  ["触发方式", "每日定时(08:00)"],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex justify-between px-3 py-2.5 text-sm">
+                    <span className="text-muted-foreground">{k}</span>
+                    <span className="text-foreground text-right max-w-[60%] truncate" title={v}>{v}</span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground text-sm">
-                本次推送无专利
+
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                本抽屉仅展示推送摘要信息,完整的专利清单及阅读状态请前往用户端订阅消息中心查看。
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     </div>
