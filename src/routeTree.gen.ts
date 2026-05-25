@@ -15,6 +15,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSubscriptionsRouteImport } from './routes/admin.subscriptions'
 import { Route as AdminRolesRouteImport } from './routes/admin.roles'
+import { Route as AdminPushRouteImport } from './routes/admin.push'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -46,10 +47,16 @@ const AdminRolesRoute = AdminRolesRouteImport.update({
   path: '/roles',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPushRoute = AdminPushRouteImport.update({
+  id: '/push',
+  path: '/push',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/push': typeof AdminPushRoute
   '/admin/roles': typeof AdminRolesRoute
   '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/push': typeof AdminPushRoute
   '/admin/roles': typeof AdminRolesRoute
   '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -66,6 +74,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/push': typeof AdminPushRoute
   '/admin/roles': typeof AdminRolesRoute
   '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -76,16 +85,24 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin/push'
     | '/admin/roles'
     | '/admin/subscriptions'
     | '/admin/users'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/roles' | '/admin/subscriptions' | '/admin/users' | '/admin'
+  to:
+    | '/'
+    | '/admin/push'
+    | '/admin/roles'
+    | '/admin/subscriptions'
+    | '/admin/users'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin/push'
     | '/admin/roles'
     | '/admin/subscriptions'
     | '/admin/users'
@@ -141,10 +158,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRolesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/push': {
+      id: '/admin/push'
+      path: '/push'
+      fullPath: '/admin/push'
+      preLoaderRoute: typeof AdminPushRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminPushRoute: typeof AdminPushRoute
   AdminRolesRoute: typeof AdminRolesRoute
   AdminSubscriptionsRoute: typeof AdminSubscriptionsRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -152,6 +177,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminPushRoute: AdminPushRoute,
   AdminRolesRoute: AdminRolesRoute,
   AdminSubscriptionsRoute: AdminSubscriptionsRoute,
   AdminUsersRoute: AdminUsersRoute,
